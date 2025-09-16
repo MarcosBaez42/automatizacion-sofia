@@ -200,7 +200,8 @@ async function notifyInstructor({
     console.warn('No se ha configurado EMAIL_USER o EMAIL_PASS. No se enviará correo.');
     return;
   }
-  const recipient = instructor?.email || instructor?.emailpersonal;
+  const recipient =
+    cfg.testMailRecipient || instructor?.email || instructor?.emailpersonal;
   if (!recipient) {
     console.warn(`No hay correo configurado para el instructor de la ficha ${ficheNumber}`);
     return;

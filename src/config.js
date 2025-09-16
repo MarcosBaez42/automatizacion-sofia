@@ -13,5 +13,6 @@ export const cfg = {
     .split(',')
     .map(s => s.trim())
     .filter(Boolean),
-  mailEnabled: process.env.MAIL_ENABLED === 'true'
+  mailEnabled: process.env.MAIL_ENABLED === 'true',
+  testMailRecipient: process.env.TEST_MAIL_RECIPIENT?.trim() || undefined
 };
