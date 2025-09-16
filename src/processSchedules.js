@@ -360,6 +360,9 @@ export async function processSchedules() {
             }
           );
           logData.result = 'Horarios actualizados como calificados';
+        } else {
+          logData.result =
+            'Reporte sin calificación confirmada; notificación enviada al instructor';
 
           await notifyInstructor({
             instructor: {
@@ -370,8 +373,6 @@ export async function processSchedules() {
             ficheNumber: codigoFicha,
             gradeInfo
           });
-        } else {
-          logData.result = 'Reporte sin calificación confirmada';
         }
 
         await DailyProcessingLog.create(logData);
