@@ -1,0 +1,19 @@
+meta {
+  name: AllOutcomes
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/outcomes?status=0
+  body: none
+  auth: none
+}
+
+query {
+  status: 0
+}
+
+headers {
+  token: {{token}}
+}

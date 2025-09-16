@@ -1,0 +1,19 @@
+meta {
+  name: AllCompetences
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/competences?status=0
+  body: none
+  auth: none
+}
+
+query {
+  status: 0
+}
+
+headers {
+  token: {{token}}
+}

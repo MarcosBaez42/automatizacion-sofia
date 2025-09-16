@@ -1,0 +1,45 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/schedules/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "fiche": "6494d0819c186d61b2f8d21b",
+    "program": "6492511a75846de7253be1e0",
+    "competence": "6492514075846de7253be1ea",
+    "outcome": "6494d90f1e048facb9232baa",
+    "instructor": "6492501975846de7253be1b8",
+    "supporttext": "test",
+    "observation": "test",
+    "environment": "6494d89d1e048facb9232b6e",
+    "days": [5,3], 
+    "fstart": "2021-05-01",
+    "fend": "2021-06-28",
+    "tstart": "03:42",
+    "tend": "15:42",
+    "events": [ {
+              "id": 1,
+              "idInstructor": "6492501975846de7253be1b8",
+              "title": "tets",
+              "start": "2023-07-13"
+          },
+          {
+              "id": 2,
+              "idInstructor": "6492501975846de7253be1b8",
+              "title": "tets",
+              "start": "2023-07-15"
+          }]
+  }
+}

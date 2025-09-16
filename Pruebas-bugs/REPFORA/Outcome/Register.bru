@@ -1,0 +1,28 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/outcomes/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "outcomes": [{
+      "name":"test1",
+      "code":"240201530 03"
+    },{
+      "name":"test2",
+      "code":"240201530 02"
+    }],
+    "competence":"64a5780de0f189fe38f79832"
+  }
+}

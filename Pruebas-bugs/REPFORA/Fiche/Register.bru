@@ -1,0 +1,24 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/fiches/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "number": "21112",
+    "program": "647147e1d280b5f57fc1519d",
+    "owner": "64714717a3499574ad1dea08",
+    "coordination":"324234234234234324234"
+  }
+}

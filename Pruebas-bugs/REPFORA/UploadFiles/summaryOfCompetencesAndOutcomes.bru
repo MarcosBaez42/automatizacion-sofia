@@ -1,0 +1,15 @@
+meta {
+  name: summaryOfCompetencesAndOutcomes
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{url}}/uploads/generatesummary
+  body: none
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}

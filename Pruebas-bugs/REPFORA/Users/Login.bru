@@ -1,0 +1,19 @@
+meta {
+  name: Login
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:4500/api/users/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "role": "ADMIN",
+      "email": "test@test.com",
+      "password":"123Admin"
+  }
+}

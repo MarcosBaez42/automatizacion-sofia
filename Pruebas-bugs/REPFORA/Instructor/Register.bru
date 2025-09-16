@@ -1,0 +1,29 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/instructors/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Silvia",
+    "tpdocument": "CC",
+    "numdocument": "1234567189",
+    "email": "Silvi123@gmail.com",
+    "phone": "3214533545",
+    "bindingtype":"TEST",
+    "caphour":0,
+    "thematicarea":"Programación",
+    "knowledge": "Programacion"
+  }
+}

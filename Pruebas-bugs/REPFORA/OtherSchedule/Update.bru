@@ -1,0 +1,32 @@
+meta {
+  name: Update
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{url}}/othersschedules/update/646792bf0db4c83041d22fe2
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "fiche": "64669dcf38258766e10499ca",
+    "program": "64657734b5aa74dc18952c92",
+    "competence": "6465ad334f66ad9feba71674",
+    "outcome": "6466d9eed1c43b051481781c",
+    "instructor": "6462b0609e16b7aa809a4316",
+    "supporttext": "dfdsf",
+    "observation": "333333",
+    "environment": "6466e6336e8f272062999482",
+    "days": ["LUNES",0], 
+    "fstart": "2021-01-01",
+    "fend": "2021-01-30",
+    "events": ["2021-01-01","2021-01-05"]
+  }
+}

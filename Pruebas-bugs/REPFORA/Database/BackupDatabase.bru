@@ -1,0 +1,15 @@
+meta {
+  name: BackupDatabase
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/backupdatabase
+  body: none
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}

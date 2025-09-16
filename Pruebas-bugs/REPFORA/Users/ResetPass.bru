@@ -1,0 +1,24 @@
+meta {
+  name: ResetPass
+  type: http
+  seq: 11
+}
+
+put {
+  url: {{url}}/users/changepassword/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNlbmFwcnVlYmFzMTIzQGdtYWlsLmNvbSIsImlkIjoiNjQ5MjJhMzBhYWExMTFiOGQzM2U2ZWUxIiwiaWF0IjoxNjg3NzQ2Njg5LCJleHAiOjE2ODc3NDY5ODl9.7uXO3wXyHlaZFb3EUiTaw3gZuzFEKRwvFf-40mawqoc
+  body: json
+  auth: none
+}
+
+query {
+  ~token: {{token}}
+}
+
+body:json {
+  {
+    "password":"12345678"
+  }
+  
+  
+  
+}

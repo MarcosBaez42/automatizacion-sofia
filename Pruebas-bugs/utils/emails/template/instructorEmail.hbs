@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <style>
+      .multiline { white-space: pre-line; }
+    </style>
+  </head>
+  <body>
+    <p>Cordial saludo respetados Instructores
+      {{#each namesInstrc}}
+        {{this}},
+      {{/each}}
+      reciban un cordial saludo mis deseos de bienestar y salud junto a sus
+      familias.</p>
+
+    <p>Amablemente me permito enviar la programación de la ficha
+      {{ficheNumber}}, El instructor
+      {{ownerName}}, fue asignado como lider de la ficha para cualquier duda y/o
+      novedad a continuación, relaciono su número de teléfono
+      {{ownerPhone}}
+      y correo electrónico
+      {{ownerEmail}}.</p>
+
+    <p class="multiline">
+      <strong>
+      Ficha:</strong>
+      {{ficheNumber}}
+      <strong>Programa:</strong>
+      {{program}}
+      <strong>Ambiente: </strong>
+      {{environment}}
+     <strong> Horario: </strong> {{daysProgram}} de 
+      {{hours}}</p>
+
+    <p>Click sobre el siguiente enlace para ver la programación:
+      <a href="{{url}}">Ver programación</a></p>
+
+    <p>Con gusto, estaré atento a sus comentarios y sugerencias.</p>
+  </body>
+</html>

@@ -1,0 +1,34 @@
+MONGO_URL='mongodb://multAdmin:JDHTDiizeqR7YdvB@89.116.49.65:27017/Horarios_SENA'
+
+
+COPY_DB = 'mongodb://multAdmin:JDHTDiizeqR7YdvB@89.116.49.65:27017/Horarios_SENA'
+
+
+# PORT
+# The port number used by the project.
+#PORT=4500
+PORT=3000
+
+# JWT_SECRET
+# The secret key used for JSON Web Token (JWT) authentication.
+JWT_SECRET = 'miclaveultrasecreta123*'
+
+# SECURY_EMAIL
+# The secure email used for sending emails.
+SECURY_EMAIL = "hphcdrdsfgltiiwh"
+
+# FROM_EMAIL
+# The email address used as the sender for emails.
+FROM_EMAIL = 'repforacidm@gmail.com'
+
+# URL_FRONTEND
+# The URL for the frontend of the project.
+#URL_FRONTEND = 'https://senahorarios.azurewebsites.net/#'
+URL_FRONTEND = 'https://repforacidm.com/#'
+
+
+# NAME FILE COUNT SERVICE GOOGLE
+# CAT repfora-c966104279a7
+# CIDM repfora-411414-2b1a696cee9c
+# CSET repforacset-5a173bf4e06e
+GOOGLE_DRIVE_API_KEY= 'repfora-411414-2b1a696cee9c.json'

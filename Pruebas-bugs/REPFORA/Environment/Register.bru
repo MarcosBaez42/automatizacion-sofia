@@ -1,0 +1,23 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/environments/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Ambiente",
+    "description":"test",
+    "town":"342432423"
+  }
+}

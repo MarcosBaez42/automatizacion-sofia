@@ -1,0 +1,21 @@
+meta {
+  name: SendResetPass
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{url}}/users/resetpassword
+  body: json
+  auth: none
+}
+
+query {
+  ~token: {{token}}
+}
+
+body:json {
+  {
+    "email":"jagues@misena.edu.co"
+  }
+}

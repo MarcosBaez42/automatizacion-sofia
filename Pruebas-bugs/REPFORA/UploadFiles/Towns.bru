@@ -1,0 +1,19 @@
+meta {
+  name: Towns
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{url}}/uploads/towns
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:form-urlencoded {
+  file: undefined
+}

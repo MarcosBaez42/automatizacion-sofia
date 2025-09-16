@@ -1,0 +1,24 @@
+meta {
+  name: Update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{url}}/outcomes/update
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "outcome":"64c05e3e94fc34060c6a657f",
+    "name": "prueba",
+    "code":"999999999 01",
+    "competence": "64ac4ac7979b65e1ee6f1a91"
+  }
+}

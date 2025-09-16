@@ -1,0 +1,22 @@
+meta {
+  name: Register
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{url}}/towns/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "San Gil",
+    "departament": "SANTANDER"
+  }
+}

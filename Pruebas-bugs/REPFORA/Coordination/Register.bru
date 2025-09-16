@@ -1,0 +1,25 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/coordinations/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YTQ0ODNiNDM1MzJlNjVjZmI5YTRlNCIsInJvbCI6IkNPT1JESU5BRE9SIiwiZW1haWwiOiJzZW5hcHJ1ZWJhczEyM0BnbWFpbC5jb20iLCJpYXQiOjE2ODg0ODc5OTksImV4cCI6MTY4ODY2MDc5OX0.Of7i-QLKMJ5Km3KbLj0dCdeBjtEzKNXWnmOWAPRwyfY
+}
+
+body:json {
+  {
+    "name": "test",
+    "coordinator": "64a4484916da617ca30b8121",
+    "modality":"VIRTUAL",
+    "email":"test@test.com",
+    "passapp":"87487437534"
+  }
+}

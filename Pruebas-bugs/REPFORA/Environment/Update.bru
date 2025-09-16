@@ -1,0 +1,23 @@
+meta {
+  name: Update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{url}}/environments/update/6465b181f43bbc4de2a380ea
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Ambiente",
+    "description":"test",
+    "town":"3453243"
+  }
+}

@@ -1,0 +1,19 @@
+meta {
+  name: RestoreDb
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{url}}/backupdatabase/restorebackup?folder=2023-07-25
+  body: none
+  auth: none
+}
+
+query {
+  folder: 2023-07-25
+}
+
+headers {
+  token: {{token}}
+}

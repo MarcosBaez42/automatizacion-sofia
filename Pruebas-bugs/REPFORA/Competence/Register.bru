@@ -1,0 +1,23 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/competences/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Competence",
+    "number": "2",
+    "program":"64a577dae0f189fe38f79827"
+  }
+}

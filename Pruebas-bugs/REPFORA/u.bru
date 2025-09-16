@@ -1,0 +1,22 @@
+meta {
+  name: u
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:4500/api/reportnew/statistics
+  body: json
+  auth: bearer
+}
+
+headers {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0ZjUyMWExZWE4Njg4YjVhZjdlZjM1ZCIsInJvbCI6IkNPT1JESU5BRE9SIiwiZW1haWwiOiJ0ZXN0QHRlc3QuY29tIiwic3VwZXIiOjEsImlhdCI6MTcwMzcwNTk4OSwiZXhwIjoxNzAzODc4Nzg5fQ.seCGyFdbVXZdIReRsj2HpebBgYHrpaKEmY-QDjuB2SI
+}
+
+body:json {
+  {
+    "fstart": "2023/10/01",
+    "fend":"2023/12/30"
+  }
+}

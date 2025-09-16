@@ -1,0 +1,15 @@
+meta {
+  name: ListDatabase
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{url}}/backupdatabase/listbackup
+  body: none
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}

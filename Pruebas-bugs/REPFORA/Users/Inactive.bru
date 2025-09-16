@@ -1,0 +1,19 @@
+meta {
+  name: Inactive
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{url}}/users/inactive/6462aaee89a17b71058c83c2
+  body: none
+  auth: none
+}
+
+query {
+  ~token: {{token}}
+}
+
+headers {
+  token: {{token}}
+}

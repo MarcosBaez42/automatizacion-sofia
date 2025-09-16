@@ -1,0 +1,23 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/programs/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "code": "111888",
+    "name": "Program",
+    "version":"test"
+  }
+}

@@ -1,0 +1,22 @@
+meta {
+  name: deleteEvent
+  type: http
+  seq: 9
+}
+
+put {
+  url: {{url}}/othersschedules/deleteevent/648291688b31e6efd54f7f94
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "event": "2023-06-06"
+  }
+  
+}

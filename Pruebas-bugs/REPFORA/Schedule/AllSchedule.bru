@@ -1,0 +1,15 @@
+meta {
+  name: AllSchedule
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/schedules
+  body: none
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}

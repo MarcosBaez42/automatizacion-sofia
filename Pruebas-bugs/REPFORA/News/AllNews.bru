@@ -1,0 +1,15 @@
+meta {
+  name: AllNews
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/news
+  body: none
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}

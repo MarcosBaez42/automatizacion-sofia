@@ -1,0 +1,24 @@
+meta {
+  name: Register
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{url}}/users/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YTQ0ODNiNDM1MzJlNjVjZmI5YTRlNCIsInJvbCI6IkNPT1JESU5BRE9SIiwiZW1haWwiOiJzZW5hcHJ1ZWJhczEyM0BnbWFpbC5jb20iLCJpYXQiOjE2ODg0ODc5OTksImV4cCI6MTY4ODY2MDc5OX0.Of7i-QLKMJ5Km3KbLj0dCdeBjtEzKNXWnmOWAPRwyfY
+}
+
+body:json {
+  {
+      "name": "TEST",
+      "email": "senapruebas123@test.com",
+      "role":"COORDINADOR",
+      "password":"12345678"
+  }
+}

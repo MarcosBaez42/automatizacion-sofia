@@ -1,0 +1,28 @@
+meta {
+  name: Update
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{url}}/users/update/6462aaee89a17b71058c83c2
+  body: json
+  auth: none
+}
+
+query {
+  ~token: {{token}}
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+      "name": "TEST",
+      "email": "senapruebas123@gmail.com",
+      "role":"COORDINADOR",
+      "password":"12345678"
+  }
+}

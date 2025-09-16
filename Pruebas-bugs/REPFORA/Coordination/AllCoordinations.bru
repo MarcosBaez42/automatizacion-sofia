@@ -1,0 +1,19 @@
+meta {
+  name: AllCoordinations
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/coordinations?status=0
+  body: none
+  auth: none
+}
+
+query {
+  status: 0
+}
+
+headers {
+  token: {{token}}
+}

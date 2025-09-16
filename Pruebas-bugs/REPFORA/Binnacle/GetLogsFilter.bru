@@ -1,0 +1,23 @@
+meta {
+  name: GetLogsFilter
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/binnacle/filterbinnacle
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+      "type": "CARGA DE JUICIOS EVALUATIVOS",
+      "datestart": "2023-08-01",
+      "dateend": "2023-08-30"
+  }
+}

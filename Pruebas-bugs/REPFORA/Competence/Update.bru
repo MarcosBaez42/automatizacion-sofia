@@ -1,0 +1,23 @@
+meta {
+  name: Update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{url}}/competences/update/64b96598882938cfd248db03
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Competence test",
+    "number": "1781282",
+    "program":"64a48c9862abd793f5ce7e1e"
+  }
+}

@@ -1,0 +1,53 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/othersschedules/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "instructor": "6492501975846de7253be1b8",
+    "typeactivity": "Apoyo a la formación",
+    "additionalactivity": "Proyectos de Investigación Aplicada",
+    "hours": 45,
+    "days": [
+      2,
+      5
+    ],
+    "justification": "hgjh",
+    "fstart": "2023/06/01",
+    "fend": "2023/06/30",
+    "tstart":"06:30",
+    "tend":"10:30",
+    "events": [
+      {
+        "id": 1,
+        "idInstructor": "6492501975846de7253be1b8",
+        "typeactivity": "Apoyo a la formación",
+        "additionalactivity": "Proyectos de Investigación Aplicada",
+        "justification": "hgjh",
+        "title": "Sandy Garcia",
+        "start": "2023-06-02"
+      },
+      {
+        "id": 2,
+        "idInstructor": "6492501975846de7253be1b8",
+        "typeactivity": "Apoyo a la formación",
+        "additionalactivity": "Proyectos de Investigación Aplicada",
+        "justification": "hgjh",
+        "title": "Sandy Garcia",
+        "start": "2023-06-06"
+      }
+    ]
+  }
+}

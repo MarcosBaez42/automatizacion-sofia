@@ -1,0 +1,40 @@
+bucaramanga
+
+
+# The port number used by the project.
+PORT=4500
+
+# JWT_SECRET
+# The secret key used for JSON Web Token (JWT) authentication.
+JWT_SECRET = 'miclaveultrasecreta123*'
+
+# SECURY_EMAIL
+# The secure email used for sending emails.
+SECURY_EMAIL = 'gbwlavympvowhttk'
+# SECURY_EMAIL = "yovltuwpvxewuxij"
+
+# FROM_EMAIL
+# The email address used as the sender for emails.
+FROM_EMAIL = 'repforacset@gmail.com'
+# FROM_EMAIL="ALEXGUEVARA31@GMAIL.COM"
+
+# URL_FRONTEND
+# The URL for the frontend of the project.
+# URL_FRONTEND = 'https://senahorarios.azurewebsites.net/#'
+URL_FRONTEND = 'http://repforacset.com/#'
+
+
+# TOKEN TINIFY
+TOKEN_TINI = '0Ym5wckKmx0PKg1s2ltd5ywKDgVpv8yk'
+
+
+# NAME FILE COUNT SERVICE GOOGLE
+# CAT repfora-c966104279a7
+# CIDM repfora-411414-2b1a696cee9c
+# CSET repforacset-5a173bf4e06e
+# CAI repforacai-90defdfa9146
+
+
+GOOGLE_DRIVE_API_KEY= 'repforacset-5a173bf4e06e.json'
+
+# GOOGLE_DRIVE_API_KEY ="fluted-arcadia-186221-b529d3b318da.json"

@@ -1,0 +1,19 @@
+meta {
+  name: UploadExcelJudgment
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/uploads/uploadexceljudgment
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:form-urlencoded {
+  file: undefined
+}

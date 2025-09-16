@@ -1,0 +1,15 @@
+meta {
+  name: getCoordinator
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{url}}/users/onlycoordinator
+  body: none
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}

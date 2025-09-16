@@ -1,0 +1,19 @@
+meta {
+  name: DownloadDB
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{url}}/backupdatabase/downloadbackup?folder="2023-07-2
+  body: none
+  auth: none
+}
+
+query {
+  folder: "2023-07-2
+}
+
+headers {
+  token: {{token}}
+}

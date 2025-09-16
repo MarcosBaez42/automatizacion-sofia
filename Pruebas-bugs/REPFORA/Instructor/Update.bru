@@ -1,0 +1,30 @@
+meta {
+  name: Update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{url}}/instructors/update/64a48f2362abd793f5ce7e5b
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Edgar Mauricio Campos Ribero",
+    "tpdocument": "CC",
+    "numdocument": "1100960044",
+     "emailpersonal": "emcampos@sena.edu.co",
+    "email": "emcampos@sena.edu.com",
+    "phone": "3012016788",
+    "knowledge": "Informática, Diseño y Desarrollo de Software",
+    "thematicarea":"Infraestructura",
+    "bindingtype":"PLANTA",
+    "caphour":700
+  }
+}

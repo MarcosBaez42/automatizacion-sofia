@@ -1,0 +1,30 @@
+meta {
+  name: post Img
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{url}}/news/register
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+      "tpnew": "TRASLADO",
+      "typetrasfer": "CENTRO",
+      "tpdocument": "CC",
+      "document": "41515151",
+      "name": "PEPITO PEREZ",
+      "email": "TEST@TEST.COM",
+      "phone": "354151154",
+      "cause": "FFFF",
+      "dateregister": "2023/05/01",
+      "fiche": "64f9d9c8f8d85be3e59f2253"
+  }
+}

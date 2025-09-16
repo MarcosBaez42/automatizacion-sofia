@@ -1,0 +1,24 @@
+meta {
+  name: Update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{url}}/fiches/update/64669dcf38258766e10499ca
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "number": "25154585",
+    "program": "64657734b5aa74dc18952c92",
+    "owner": "6462b0609e16b7aa809a4316",
+    "coordination":"324234234234234324234"
+  }
+}

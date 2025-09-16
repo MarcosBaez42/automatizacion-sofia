@@ -1,0 +1,15 @@
+meta {
+  name: Logout
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{url}}/users/logout
+  body: none
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}

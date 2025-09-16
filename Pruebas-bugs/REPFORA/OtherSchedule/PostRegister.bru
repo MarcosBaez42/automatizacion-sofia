@@ -1,0 +1,28 @@
+meta {
+  name: PostRegister
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{url}}/othersschedules/validateschedule
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "instructor": "6492501975846de7253be1b8",
+    "typeactivity":"test",
+    "additionalactivity":"test",
+    "hours":20,
+    "days": [5,3], 
+    "justification":"test",
+    "fstart": "2021-05-01",
+    "fend": "2021-06-28"
+  }
+}

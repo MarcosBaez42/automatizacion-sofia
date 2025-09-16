@@ -1,0 +1,32 @@
+meta {
+  name: PostRegister
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{url}}/schedules/validateschedule
+  body: json
+  auth: none
+}
+
+headers {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "fiche": "647609dab5163741cd66c6c7",
+    "instructor":"64714717a3499574ad1dea08",
+    "competence":"64827215d0dabd8c3f531e8f",
+    "outcome":"6482724bd0dabd8c3f531eaa",
+    "environment": "6480773d610a0bbde8304473",
+    "program":"64760436b5163741cd66c659",
+    "days": [4,5], 
+    "fstart": "2023/06/02",
+    "fend": "2023/06/19",
+    "tstart": "06:30",
+    "tend": "12:30"
+  }
+  
+}
