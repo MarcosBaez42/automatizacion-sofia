@@ -6,9 +6,9 @@ import * as XLSX from 'xlsx/xlsx.mjs';
 import nodemailer from 'nodemailer';
 import { iniciarSesion, descargarReporte } from './loginDownload.js';
 import { cfg } from './config.js';
-import Schedule from '../Pruebas-bugs/models/Schedule.js';
-import Fiche from '../Pruebas-bugs/models/Fiche.js';
-import Instructor from '../Pruebas-bugs/models/Instructor.js';
+import Schedule from './models/Schedule.js';
+import Fiche from './models/Fiche.js';
+import Instructor from './models/Instructor.js';
 
 const { Schema } = mongoose;
 
