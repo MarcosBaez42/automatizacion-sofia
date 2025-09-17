@@ -309,6 +309,9 @@ export async function processSchedules() {
     }
   ]);
 
+  const maxGroupsToProcess = 3;
+  const groupsToProcess = groups.slice(0, maxGroupsToProcess);
+
   if (!groups.length) {
     console.log('No se encontraron horarios pendientes de calificación.');
     await mongoose.disconnect();
@@ -319,10 +322,19 @@ export async function processSchedules() {
     `Se encontraron ${groups.length} fichas con horarios pendientes de calificación.`
   );
 
+  const pendingGroups = groups.length - groupsToProcess.length;
+  console.log(
+    `Se procesarán ${groupsToProcess.length} fichas${
+      pendingGroups > 0
+        ? ` y quedarán ${pendingGroups} pendientes para la siguiente ejecución`
+        : ''
+    }.`
+  );
+
   const { browser, page } = await iniciarSesion();
 
   try {
-    for (const group of groups) {
+    for (const group of groupsToProcess) {
       const logData = {
         fiche: group.ficheId,
         ficheNumber: group.ficheNumber,
