@@ -38,12 +38,68 @@ const run = async () => {
   console.log(`Horarios pendientes de calificar: ${pendientes}`);
   console.log(`Horarios calificados: ${calificados}`);
 
-  const muestra = await Schedule.find({ calificado: false })
-    .select({ _id: 1, fiche: 1 })
-    .limit(5);
+  const muestra = await Schedule.aggregate([
+    { $match: { calificado: false } },
+    { $limit: 5 },
+    {
+      $lookup: {
+        from: "fiches",
+        localField: "fiche",
+        foreignField: "_id",
+        as: "fiche",
+      },
+    },
+    {
+      $unwind: {
+        path: "$fiche",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "programs",
+        localField: "fiche.program",
+        foreignField: "_id",
+        as: "program",
+      },
+    },
+    {
+      $unwind: {
+        path: "$program",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        scheduleId: "$_id",
+        ficheNumber: "$fiche.number",
+        programName: {
+          $ifNull: [
+            "$program.name",
+            {
+              $ifNull: ["$fiche.programName", "$fiche.program_name"],
+            },
+          ],
+        },
+      },
+    },
+  ]);
+
+  const ejemplos = muestra.map((item) => {
+    const nombrePrograma = item.programName || "Programa sin nombre";
+    const numeroFicha = item.ficheNumber || null;
+
+    if (numeroFicha) {
+      return `${nombrePrograma} ficha: ${numeroFicha}`;
+    }
+
+    const horarioId = item.scheduleId ? item.scheduleId.toString() : "desconocido";
+    return `${nombrePrograma} (horario: ${horarioId})`;
+  });
+
   console.log(
-    `Ejemplo de horarios sin calificar tras la migración (máximo 5):`,
-    muestra.map((schedule) => schedule._id.toString())
+    `Horarios sin calificar tras la migración (máximo 5):`,
+    ejemplos
   );
 };
 
