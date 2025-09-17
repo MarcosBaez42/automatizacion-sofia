@@ -1,11 +1,7 @@
 import mongoose from "mongoose";
-import * as dotenv from "dotenv";
-
 import Schedule from "../models/Schedule.js";
-
-dotenv.config();
-
-const mongoUri = process.env.MONGO_URL || "mongodb://localhost:27017/adso076";
+import { cfg } from "../config.js";
+const mongoUri = cfg.mongoUrl;
 
 const buildCalificadoBootstrap = () => ({
   $or: [

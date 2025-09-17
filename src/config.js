@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 export const cfg = {
+  mongoUrl: process.env.MONGO_URL || 'mongodb://localhost:27017/adso076',
   sofiaUser: process.env.SOFIA_USER,
   sofiaPass: process.env.SOFIA_PASS,
   emailUser: process.env.EMAIL_USER,

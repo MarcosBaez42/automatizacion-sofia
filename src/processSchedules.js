@@ -241,8 +241,9 @@ async function notifyInstructor({
 }
 
 export async function processSchedules() {
-  const mongoUri = 'mongodb://localhost:27017/adso076';
+  const mongoUri = cfg.mongoUrl;
   await mongoose.connect(mongoUri);
+  console.log(`Conectado a MongoDB en ${mongoUri}`);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -313,6 +314,10 @@ export async function processSchedules() {
     await mongoose.disconnect();
     return;
   }
+
+  console.log(
+    `Se encontraron ${groups.length} fichas con horarios pendientes de calificación.`
+  );
 
   const { browser, page } = await iniciarSesion();
 
