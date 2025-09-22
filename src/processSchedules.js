@@ -254,7 +254,7 @@ export async function processSchedules() {
     {
       $match: {
         $and: [
-          { fend: { $lte: limitDate } },
+          { fend: { $lt: limitDate } },
           {
             $or: [
               { calificado: { $exists: false } },
