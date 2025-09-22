@@ -9,11 +9,23 @@ import { cfg } from './config.js';
 import Schedule from './models/Schedule.js';
 import Fiche from './models/Fiche.js';
 import Instructor from './models/Instructor.js';
+import {
+  findHeaderIndex,
+  normalizeText,
+  parseExcelDate
+} from './utils/reportProcessing.js';
 
 const { Schema } = mongoose;
 
 XLSX.set_fs(fs);
 
+const MAX_GROUPS_TO_PROCESS = 3;
+
+/**
+ * Esquema del log diario utilizado para documentar cada ejecución del proceso
+ * automático. Guarda la ficha, instructor, horarios afectados, resultado de la
+ * calificación y posibles errores para facilitar el seguimiento posterior.
+ */
 const processingLogSchema = new Schema(
   {
     fiche: { type: Schema.Types.ObjectId, ref: 'Fiche', required: true },
@@ -41,59 +53,101 @@ const DailyProcessingLog =
   mongoose.models.DailyProcessingLog ||
   mongoose.model('DailyProcessingLog', processingLogSchema);
 
-function normalizeText(value) {
-  if (value == null) {
-    return '';
-  }
-  return String(value)
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
+/**
+ * Construye el pipeline de agregación que obtiene las fichas con horarios
+ * pendientes de calificación dentro del rango de fechas permitido.
+ *
+ * @param {Date} limitDate - Fecha límite utilizada para filtrar horarios.
+ * @returns {Array<Object>} Stages de la agregación de MongoDB.
+ */
+function buildPendingSchedulesPipeline(limitDate) {
+  return [
+    {
+      $match: {
+        $and: [
+          { fend: { $lt: limitDate } },
+          {
+            $or: [
+              { calificado: { $exists: false } },
+              { calificado: false },
+              { calificado: null }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      $group: {
+        _id: '$fiche',
+        scheduleIds: { $addToSet: '$_id' },
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $lookup: {
+        from: Fiche.collection.name,
+        localField: '_id',
+        foreignField: '_id',
+        as: 'fiche'
+      }
+    },
+    { $unwind: '$fiche' },
+    {
+      $lookup: {
+        from: Instructor.collection.name,
+        localField: 'fiche.owner',
+        foreignField: '_id',
+        as: 'instructor'
+      }
+    },
+    {
+      $unwind: {
+        path: '$instructor',
+        preserveNullAndEmptyArrays: true
+      }
+    },
+    {
+      $project: {
+        ficheId: '$_id',
+        scheduleIds: 1,
+        scheduleCount: '$count',
+        ficheNumber: '$fiche.number',
+        instructorId: '$instructor._id',
+        instructorName: '$instructor.name',
+        instructorEmail: '$instructor.email',
+        instructorEmailPersonal: '$instructor.emailpersonal'
+      }
+    }
+  ];
 }
 
-function findHeaderIndex(headers, predicate) {
-  for (let i = 0; i < headers.length; i += 1) {
-    const header = headers[i];
-    if (!header) continue;
-    const normalized = normalizeText(header);
-    if (predicate(normalized)) {
-      return i;
-    }
-  }
-  return -1;
+/**
+ * Ejecuta la agregación para recuperar los grupos de horarios pendientes.
+ *
+ * @param {Date} limitDate - Fecha límite para filtrar horarios.
+ * @returns {Promise<Array<Object>>} Resultados de la agregación.
+ */
+function fetchPendingScheduleGroups(limitDate) {
+  const pipeline = buildPendingSchedulesPipeline(limitDate);
+  return Schedule.aggregate(pipeline);
 }
 
-function parseExcelDate(value) {
-  if (!value) {
-    return null;
-  }
-  if (value instanceof Date) {
-    return value;
-  }
-  if (typeof value === 'number') {
-    const parsed = XLSX.SSF.parse_date_code(value);
-    if (!parsed) {
-      return null;
-    }
-    return new Date(
-      parsed.y,
-      (parsed.m || 1) - 1,
-      parsed.d || 1,
-      parsed.H || 0,
-      parsed.M || 0,
-      parsed.S || 0
-    );
-  }
-  if (typeof value === 'string') {
-    const timestamp = Date.parse(value);
-    if (!Number.isNaN(timestamp)) {
-      return new Date(timestamp);
-    }
-  }
-  return null;
-}
-
+/**
+ * Analiza el reporte descargado de Sofía Plus para determinar el estado de
+ * calificación de los aprendices.
+ *
+ * @param {string} reportPath - Ruta local del archivo de Excel descargado.
+ * @returns {{
+ *   graded: boolean,
+ *   gradeStatus: string,
+ *   gradeDate: Date | null,
+ *   gradedRows: Array<Object>,
+ *   pendingRows: Array<Object>,
+ *   statusIndex: number,
+ *   dateIndex: number
+ * }} Información obtenida tras inspeccionar el reporte.
+ * @throws {Error} Cuando el archivo no tiene hojas para analizar.
+ */
 function inspectReport(reportPath) {
   const workbook = XLSX.readFile(reportPath, { cellDates: true });
   const sheetName = workbook.SheetNames[0];
@@ -187,6 +241,18 @@ function inspectReport(reportPath) {
   };
 }
 
+/**
+ * Notifica al instructor responsable de una ficha cuando no se detecta
+ * calificación final en el reporte descargado.
+ *
+ * @param {{
+ *   instructor: { email?: string, emailpersonal?: string, name?: string } | null,
+ *   ficheNumber: string,
+ *   gradeInfo: { gradeStatus: string, gradeDate: Date | null }
+ * }} options - Información necesaria para componer y enviar el correo.
+ * @returns {Promise<void>} Promesa que se resuelve tras enviar (u omitir) el
+ *   correo electrónico.
+ */
 async function notifyInstructor({
   instructor,
   ficheNumber,
@@ -240,7 +306,14 @@ async function notifyInstructor({
   });
 }
 
+/**
+ * Proceso principal que descarga los reportes de horarios desde Sofía Plus y
+ * actualiza el estado de calificación en la base de datos institucional.
+ *
+ * @returns {Promise<void>} Promesa que se resuelve cuando el proceso finaliza.
+ */
 export async function processSchedules() {
+  // Conexión a MongoDB para acceder a fichas, instructores y horarios.
   const mongoUri = cfg.mongoUrl;
   await mongoose.connect(mongoUri);
   console.log(`Conectado a MongoDB en ${mongoUri}`);
@@ -250,67 +323,9 @@ export async function processSchedules() {
   const limitDate = new Date(today);
   limitDate.setDate(limitDate.getDate() - 5);
 
-  const groups = await Schedule.aggregate([
-    {
-      $match: {
-        $and: [
-          { fend: { $lt: limitDate } },
-          {
-            $or: [
-              { calificado: { $exists: false } },
-              { calificado: false },
-              { calificado: null }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      $group: {
-        _id: '$fiche',
-        scheduleIds: { $addToSet: '$_id' },
-        count: { $sum: 1 }
-      }
-    },
-    {
-      $lookup: {
-        from: Fiche.collection.name,
-        localField: '_id',
-        foreignField: '_id',
-        as: 'fiche'
-      }
-    },
-    { $unwind: '$fiche' },
-    {
-      $lookup: {
-        from: Instructor.collection.name,
-        localField: 'fiche.owner',
-        foreignField: '_id',
-        as: 'instructor'
-      }
-    },
-    {
-      $unwind: {
-        path: '$instructor',
-        preserveNullAndEmptyArrays: true
-      }
-    },
-    {
-      $project: {
-        ficheId: '$_id',
-        scheduleIds: 1,
-        scheduleCount: '$count',
-        ficheNumber: '$fiche.number',
-        instructorId: '$instructor._id',
-        instructorName: '$instructor.name',
-        instructorEmail: '$instructor.email',
-        instructorEmailPersonal: '$instructor.emailpersonal'
-      }
-    }
-  ]);
-
-  const maxGroupsToProcess = 3;
-  const groupsToProcess = groups.slice(0, maxGroupsToProcess);
+  // Ejecución de la agregación para identificar fichas con horarios pendientes.
+  const groups = await fetchPendingScheduleGroups(limitDate);
+  const groupsToProcess = groups.slice(0, MAX_GROUPS_TO_PROCESS);
 
   if (!groups.length) {
     console.log('No se encontraron horarios pendientes de calificación.');
@@ -334,6 +349,7 @@ export async function processSchedules() {
   const { browser, page } = await iniciarSesion();
 
   try {
+    // Procesamiento por ficha: descargar reporte e interpretar estado.
     for (const group of groupsToProcess) {
       const logData = {
         fiche: group.ficheId,
@@ -365,6 +381,7 @@ export async function processSchedules() {
         logData.gradeDate = gradeInfo.gradeDate || null;
 
         if (gradeInfo.graded) {
+          // Actualización de horarios cuando se confirma calificación en el reporte.
           await Schedule.updateMany(
             { _id: { $in: group.scheduleIds } },
             {
@@ -381,6 +398,7 @@ export async function processSchedules() {
           logData.result =
             'Reporte sin calificación confirmada; notificación enviada al instructor';
 
+          // Notificación al instructor para solicitar revisión o calificación pendiente.
           await notifyInstructor({
             instructor: {
               email: group.instructorEmail,
@@ -392,16 +410,19 @@ export async function processSchedules() {
           });
         }
 
+        // Registro del resultado de cada ficha para auditoría del proceso.
         await DailyProcessingLog.create(logData);
       } catch (error) {
         console.error(`Error procesando la ficha ${group.ficheNumber}:`, error);
         logData.errorMessage = error.message;
         logData.gradeStatus = 'Error en el procesamiento';
         logData.result = 'No fue posible actualizar el estado';
+        // Persistencia del error encontrado durante el procesamiento.
         await DailyProcessingLog.create(logData);
       }
     }
   } finally {
+    // Cierre de recursos independientemente del resultado del procesamiento.
     await browser.close();
     await mongoose.disconnect();
   }
@@ -414,6 +435,7 @@ const isExecutedDirectly =
   process.argv[1] && path.resolve(process.argv[1]) === currentFilePath;
 
 if (isExecutedDirectly) {
+  // Permite ejecutar el script directamente desde la línea de comandos.
   processSchedules()
     .then(() => {
       console.log('Procesamiento de horarios finalizado.');
