@@ -94,7 +94,7 @@ const run = async () => {
   });
 
   console.log(
-    `Horarios sin calificar tras la migración (máximo 5):`,
+    `Horarios sin calificar tras la migración (visualizacion de 5):`,
     ejemplos
   );
 };
