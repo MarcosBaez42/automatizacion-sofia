@@ -11,6 +11,7 @@ import Fiche from './models/Fiche.js';
 import Instructor from './models/Instructor.js';
 import {
   findHeaderIndex,
+  findHeaderIndexes,
   normalizeText,
   parseExcelDate
 } from './utils/reportProcessing.js';
@@ -38,6 +39,8 @@ const processingLogSchema = new Schema(
     graded: Boolean,
     gradeStatus: String,
     gradeDate: Date,
+    qualifiable: Boolean,
+    qualifiableDate: Date,
     reportFile: String,
     result: String,
     errorMessage: String,
@@ -72,7 +75,8 @@ function buildPendingSchedulesPipeline(limitDate) {
               { calificado: false },
               { calificado: null }
             ]
-          }
+          },
+          { calificable: { $ne: false } }
         ]
       }
     },
@@ -193,6 +197,10 @@ function inspectReport(reportPath) {
 
   const gradedRows = [];
   const pendingRows = [];
+  const qualifiableDateIndexes = findHeaderIndexes(
+    headers,
+    header => header.includes('fecha') && header.includes('calificable')
+  );
 
   for (let i = 1; i < rows.length; i += 1) {
     const row = rows[i];
@@ -213,6 +221,7 @@ function inspectReport(reportPath) {
 
   const graded = gradedRows.length > 0 && pendingRows.length === 0;
   let gradeDate = null;
+  let qualifiableDate = null;
 
   if (graded && resolvedDateIndex >= 0) {
     gradedRows.forEach(({ row }) => {
@@ -222,6 +231,22 @@ function inspectReport(reportPath) {
         gradeDate = parsed;
       }
     });
+  }
+
+  if (qualifiableDateIndexes.length > 0) {
+    for (let i = 1; i < rows.length; i += 1) {
+      const row = rows[i];
+      if (!Array.isArray(row)) {
+        continue;
+      }
+      for (const index of qualifiableDateIndexes) {
+        const value = row[index];
+        const parsed = parseExcelDate(value);
+        if (parsed && (!qualifiableDate || parsed > qualifiableDate)) {
+          qualifiableDate = parsed;
+        }
+      }
+    }
   }
 
   const gradeStatus = graded
@@ -234,6 +259,7 @@ function inspectReport(reportPath) {
     graded,
     gradeStatus,
     gradeDate,
+    qualifiableDate,
     gradedRows,
     pendingRows,
     statusIndex: resolvedStatusIndex,
@@ -362,6 +388,8 @@ export async function processSchedules() {
         graded: false,
         gradeStatus: 'No procesado',
         gradeDate: null,
+        qualifiable: true,
+        qualifiableDate: null,
         result: '',
         reportFile: ''
       };
@@ -379,14 +407,17 @@ export async function processSchedules() {
         logData.graded = gradeInfo.graded;
         logData.gradeStatus = gradeInfo.gradeStatus;
         logData.gradeDate = gradeInfo.gradeDate || null;
+        logData.qualifiableDate = gradeInfo.qualifiableDate || null;
 
         if (gradeInfo.graded) {
+          logData.qualifiable = true;
           // Actualización de horarios cuando se confirma calificación en el reporte.
           await Schedule.updateMany(
             { _id: { $in: group.scheduleIds } },
             {
               $set: {
                 calificado: true,
+                calificable: true,
                 fechaCalificacion: gradeInfo.gradeDate || new Date(),
                 estadoCalificacion: gradeInfo.gradeStatus,
                 calificadoPorProceso: 'processSchedules'
@@ -395,19 +426,47 @@ export async function processSchedules() {
           );
           logData.result = 'Horarios actualizados como calificados';
         } else {
-          logData.result =
-            'Reporte sin calificación confirmada; notificación enviada al instructor';
+          const qualifiableDate = gradeInfo.qualifiableDate || null;
+          let qualifiableFuture = false;
+          if (qualifiableDate) {
+            const normalizedQualifiableDate = new Date(qualifiableDate);
+            normalizedQualifiableDate.setHours(0, 0, 0, 0);
+            qualifiableFuture = normalizedQualifiableDate > today;
+          }
 
-          // Notificación al instructor para solicitar revisión o calificación pendiente.
-          await notifyInstructor({
-            instructor: {
-              email: group.instructorEmail,
-              emailpersonal: group.instructorEmailPersonal,
-              name: group.instructorName
-            },
-            ficheNumber: codigoFicha,
-            gradeInfo
-          });
+          logData.qualifiable = !qualifiableFuture;
+
+          await Schedule.updateMany(
+            { _id: { $in: group.scheduleIds } },
+            {
+              $set: {
+                calificado: false,
+                calificable: !qualifiableFuture,
+                fechaCalificacion: gradeInfo.gradeDate || null,
+                estadoCalificacion: gradeInfo.gradeStatus,
+                calificadoPorProceso: 'processSchedules'
+              }
+            }
+          );
+
+          if (qualifiableFuture) {
+            logData.result =
+              'Reporte con fecha calificable futura; seguimiento pospuesto';
+          } else {
+            logData.result =
+              'Reporte sin calificación confirmada; notificación enviada al instructor';
+
+            // Notificación al instructor para solicitar revisión o calificación pendiente.
+            await notifyInstructor({
+              instructor: {
+                email: group.instructorEmail,
+                emailpersonal: group.instructorEmailPersonal,
+                name: group.instructorName
+              },
+              ficheNumber: codigoFicha,
+              gradeInfo
+            });
+          }
         }
 
         // Registro del resultado de cada ficha para auditoría del proceso.

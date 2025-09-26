@@ -7,6 +7,7 @@ const scheduleSchema = new Schema(
     fiche: { type: Schema.Types.ObjectId, ref: 'Fiche', required: true },
     fend: { type: Date },
     calificado: { type: Boolean, default: false },
+    calificable: { type: Boolean, default: true },
     fechaCalificacion: { type: Date },
     estadoCalificacion: { type: String },
     calificadoPorProceso: { type: String }

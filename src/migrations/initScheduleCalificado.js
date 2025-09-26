@@ -11,6 +11,14 @@ const buildCalificadoBootstrap = () => ({
   ],
 });
 
+const buildCalificableBootstrap = () => ({
+  $or: [
+    { calificable: { $exists: false } },
+    { calificable: null },
+    { calificable: { $nin: [true, false] } },
+  ],
+});
+
 const run = async () => {
   await mongoose.connect(mongoUri);
   console.log(`Conectado a MongoDB en ${mongoUri}`);
@@ -22,6 +30,16 @@ const run = async () => {
 
   console.log(
     `Documentos actualizados con calificado=false: ${updateResult.modifiedCount}`
+  );
+
+  // Inicializa el nuevo indicador de calificable para documentos existentes.
+  const calificableFilter = buildCalificableBootstrap();
+  const calificableResult = await Schedule.updateMany(calificableFilter, {
+    $set: { calificable: true },
+  });
+
+  console.log(
+    `Documentos inicializados con calificable=true: ${calificableResult.modifiedCount}`
   );
 
   const [total, pendientes, calificados] = await Promise.all([

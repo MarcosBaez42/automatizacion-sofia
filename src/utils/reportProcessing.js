@@ -41,6 +41,28 @@ export function findHeaderIndex(headers, predicate) {
 }
 
 /**
+ * Finds the indexes of all column headers that satisfy the provided
+ * predicate.
+ *
+ * @param {Array<unknown>} headers - List of headers from the spreadsheet.
+ * @param {(normalizedValue: string) => boolean} predicate - Predicate applied to
+ *   the normalized header values.
+ * @returns {Array<number>} Indexes of the headers that satisfy the predicate.
+ */
+export function findHeaderIndexes(headers, predicate) {
+  const indexes = [];
+  for (let i = 0; i < headers.length; i += 1) {
+    const header = headers[i];
+    if (!header) continue;
+    const normalized = normalizeText(header);
+    if (predicate(normalized)) {
+      indexes.push(i);
+    }
+  }
+  return indexes;
+}
+
+/**
  * Parses the value found in a spreadsheet cell into a JavaScript `Date`.
  *
  * @param {unknown} value - Raw value from the cell.
