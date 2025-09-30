@@ -9,6 +9,9 @@ import { cfg } from './config.js';
 import Schedule from './models/Schedule.js';
 import Fiche from './models/Fiche.js';
 import Instructor from './models/Instructor.js';
+import DailyProcessingLog, {
+  NOTIFICATION_RESULT_MESSAGE
+} from './models/DailyProcessingLog.js';
 import {
   findHeaderIndex,
   findHeaderIndexes,
@@ -16,45 +19,9 @@ import {
   parseExcelDate
 } from './utils/reportProcessing.js';
 
-const { Schema } = mongoose;
-
 XLSX.set_fs(fs);
 
 const MAX_GROUPS_TO_PROCESS = 3;
-
-/**
- * Esquema del log diario utilizado para documentar cada ejecución del proceso
- * automático. Guarda la ficha, instructor, horarios afectados, resultado de la
- * calificación y posibles errores para facilitar el seguimiento posterior.
- */
-const processingLogSchema = new Schema(
-  {
-    fiche: { type: Schema.Types.ObjectId, ref: 'Fiche', required: true },
-    ficheNumber: { type: String, required: true },
-    instructor: { type: Schema.Types.ObjectId, ref: 'Instructor' },
-    instructorName: String,
-    instructorEmail: String,
-    scheduleIds: [{ type: Schema.Types.ObjectId, ref: 'Schedules' }],
-    scheduleCount: Number,
-    graded: Boolean,
-    gradeStatus: String,
-    gradeDate: Date,
-    qualifiable: Boolean,
-    qualifiableDate: Date,
-    reportFile: String,
-    result: String,
-    errorMessage: String,
-    processedAt: { type: Date, default: Date.now }
-  },
-  {
-    timestamps: true,
-    collection: 'dailyprocessinglogs'
-  }
-);
-
-const DailyProcessingLog =
-  mongoose.models.DailyProcessingLog ||
-  mongoose.model('DailyProcessingLog', processingLogSchema);
 
 /**
  * Construye el pipeline de agregación que obtiene las fichas con horarios
@@ -398,7 +365,8 @@ export async function processSchedules() {
         qualifiable: true,
         qualifiableDate: null,
         result: '',
-        reportFile: ''
+        reportFile: '',
+        notificationSentAt: null
       };
 
       try {
@@ -467,8 +435,8 @@ export async function processSchedules() {
             logData.result =
               'Reporte con fecha calificable futura; seguimiento pospuesto';
           } else {
-            logData.result =
-              'Reporte sin calificación confirmada; notificación enviada al instructor';
+            logData.result = NOTIFICATION_RESULT_MESSAGE;
+            logData.notificationSentAt = new Date();
 
             // Notificación al instructor para solicitar revisión o calificación pendiente.
             await notifyInstructor({

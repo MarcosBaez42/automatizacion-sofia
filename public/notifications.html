@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notificaciones enviadas a instructores</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 2rem;
+        background-color: #f7f7f7;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        background-color: #ffffff;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .filters label {
+        display: flex;
+        flex-direction: column;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+
+      .filters input {
+        margin-top: 0.25rem;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+      }
+
+      .filters button {
+        align-self: flex-end;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 0.25rem;
+        background-color: #0b5ed7;
+        color: #ffffff;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .filters button:hover {
+        background-color: #0a53be;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      th,
+      td {
+        padding: 0.75rem;
+        border: 1px solid #e0e0e0;
+        text-align: left;
+      }
+
+      th {
+        background-color: #0b5ed7;
+        color: #ffffff;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      .status {
+        font-weight: bold;
+      }
+
+      #feedback {
+        margin-top: 1rem;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Notificaciones enviadas a instructores</h1>
+
+    <form id="filters" class="filters">
+      <label>
+        Desde
+        <input type="date" id="startDate" name="startDate" />
+      </label>
+      <label>
+        Hasta
+        <input type="date" id="endDate" name="endDate" />
+      </label>
+      <label>
+        Número de ficha
+        <input type="text" id="ficheNumber" name="ficheNumber" placeholder="Ej. 123456" />
+      </label>
+      <button type="submit">Aplicar filtros</button>
+    </form>
+
+    <div id="feedback"></div>
+
+    <table aria-describedby="feedback">
+      <thead>
+        <tr>
+          <th>Ficha</th>
+          <th>Instructor</th>
+          <th>Correo</th>
+          <th>Estado de calificación</th>
+          <th>Fecha de calificación</th>
+          <th>Reporte</th>
+          <th>Procesado</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+
+    <script>
+      const filtersForm = document.getElementById('filters');
+      const feedback = document.getElementById('feedback');
+      const resultsBody = document.getElementById('resultsBody');
+
+      async function fetchNotifications() {
+        const formData = new FormData(filtersForm);
+        const params = new URLSearchParams();
+
+        for (const [key, value] of formData.entries()) {
+          if (value) {
+            params.append(key, value);
+          }
+        }
+
+        const url = `/notifications/emails${
+          params.toString() ? `?${params.toString()}` : ''
+        }`;
+
+        feedback.textContent = 'Consultando notificaciones…';
+        resultsBody.innerHTML = '';
+
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error('No se pudo obtener la información.');
+          }
+
+          const data = await response.json();
+          renderTable(data);
+          feedback.textContent = data.length
+            ? `Se encontraron ${data.length} notificaciones enviadas.`
+            : 'No se encontraron notificaciones con los filtros seleccionados.';
+        } catch (error) {
+          console.error(error);
+          feedback.textContent =
+            'Ocurrió un error al recuperar la información. Intenta nuevamente.';
+        }
+      }
+
+      function renderTable(rows) {
+        resultsBody.innerHTML = '';
+
+        for (const row of rows) {
+          const tr = document.createElement('tr');
+
+          tr.innerHTML = `
+            <td>${row.ficheNumber || ''}</td>
+            <td>${row.instructorName || ''}</td>
+            <td>${row.instructorEmail || ''}</td>
+            <td class="status">${row.gradeStatus || ''}</td>
+            <td>${formatDate(row.gradeDate)}</td>
+            <td>${row.reportFile || ''}</td>
+            <td>${formatDateTime(row.processedAt)}</td>
+          `;
+
+          resultsBody.appendChild(tr);
+        }
+      }
+
+      function formatDate(value) {
+        if (!value) return '';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        return date.toLocaleDateString();
+      }
+
+      function formatDateTime(value) {
+        if (!value) return '';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        })}`;
+      }
+
+      filtersForm.addEventListener('submit', event => {
+        event.preventDefault();
+        fetchNotifications();
+      });
+
+      fetchNotifications();
+    </script>
+  </body>
+</html>
