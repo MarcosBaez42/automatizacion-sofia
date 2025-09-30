@@ -91,7 +91,70 @@ export function parseExcelDate(value) {
     );
   }
   if (typeof value === 'string') {
-    const timestamp = Date.parse(value);
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const customMatch = trimmed.match(
+      /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})(?:\s+(\d{1,2})(?::(\d{1,2})(?::(\d{1,2}))?)?)?$/
+    );
+
+    if (customMatch) {
+      const [, dayStr, monthStr, yearStr, hourStr, minuteStr, secondStr] = customMatch;
+      const day = Number(dayStr);
+      const monthIndex = Number(monthStr) - 1;
+      const year = Number(yearStr);
+      const hour = hourStr ? Number(hourStr) : 0;
+      const minute = minuteStr ? Number(minuteStr) : 0;
+      const second = secondStr ? Number(secondStr) : 0;
+
+      if (
+        Number.isNaN(day) ||
+        Number.isNaN(monthIndex) ||
+        Number.isNaN(year) ||
+        Number.isNaN(hour) ||
+        Number.isNaN(minute) ||
+        Number.isNaN(second)
+      ) {
+        return null;
+      }
+
+      if (
+        day < 1 ||
+        day > 31 ||
+        monthIndex < 0 ||
+        monthIndex > 11 ||
+        hour < 0 ||
+        hour > 23 ||
+        minute < 0 ||
+        minute > 59 ||
+        second < 0 ||
+        second > 59
+      ) {
+        return null;
+      }
+
+      const manualDate = new Date(year, monthIndex, day, hour, minute, second);
+
+      if (
+        manualDate.getFullYear() === year &&
+        manualDate.getMonth() === monthIndex &&
+        manualDate.getDate() === day &&
+        manualDate.getHours() === hour &&
+        manualDate.getMinutes() === minute &&
+        manualDate.getSeconds() === second
+      ) {
+        console.debug(
+          '[parseExcelDate] Fecha personalizada reconocida:',
+          trimmed,
+          manualDate
+        );
+        return manualDate;
+      }
+    }
+
+    const timestamp = Date.parse(trimmed);
     if (!Number.isNaN(timestamp)) {
       return new Date(timestamp);
     }
