@@ -63,7 +63,7 @@ const DailyProcessingLog =
  * @param {Date} limitDate - Fecha límite utilizada para filtrar horarios.
  * @returns {Array<Object>} Stages de la agregación de MongoDB.
  */
-function buildPendingSchedulesPipeline(limitDate) {
+function buildPendingSchedulesPipeline(limitDate, today) {
   return [
     {
       $match: {
@@ -76,7 +76,18 @@ function buildPendingSchedulesPipeline(limitDate) {
               { calificado: null }
             ]
           },
-          { calificable: { $ne: false } }
+          {
+            $or: [
+              { calificable: { $ne: false } },
+              {
+                $and: [
+                  { calificable: false },
+                  { fechaCalificable: { $exists: true, $ne: null } },
+                  { fechaCalificable: { $lte: today } }
+                ]
+              }
+            ]
+          }
         ]
       }
     },
@@ -131,8 +142,8 @@ function buildPendingSchedulesPipeline(limitDate) {
  * @param {Date} limitDate - Fecha límite para filtrar horarios.
  * @returns {Promise<Array<Object>>} Resultados de la agregación.
  */
-function fetchPendingScheduleGroups(limitDate) {
-  const pipeline = buildPendingSchedulesPipeline(limitDate);
+function fetchPendingScheduleGroups(limitDate, today) {
+  const pipeline = buildPendingSchedulesPipeline(limitDate, today);
   return Schedule.aggregate(pipeline);
 }
 
@@ -350,7 +361,7 @@ export async function processSchedules() {
   limitDate.setDate(limitDate.getDate() - 5);
 
   // Ejecución de la agregación para identificar fichas con horarios pendientes.
-  const groups = await fetchPendingScheduleGroups(limitDate);
+  const groups = await fetchPendingScheduleGroups(limitDate, today);
   const groupsToProcess = groups.slice(0, MAX_GROUPS_TO_PROCESS);
 
   if (!groups.length) {
@@ -407,10 +418,18 @@ export async function processSchedules() {
         logData.graded = gradeInfo.graded;
         logData.gradeStatus = gradeInfo.gradeStatus;
         logData.gradeDate = gradeInfo.gradeDate || null;
-        logData.qualifiableDate = gradeInfo.qualifiableDate || null;
+        const rawQualifiableDate = gradeInfo.qualifiableDate || null;
+        const normalizedQualifiableDate = rawQualifiableDate
+          ? new Date(rawQualifiableDate)
+          : null;
+        if (normalizedQualifiableDate) {
+          normalizedQualifiableDate.setHours(0, 0, 0, 0);
+        }
+        logData.qualifiableDate = normalizedQualifiableDate;
 
         if (gradeInfo.graded) {
           logData.qualifiable = true;
+          logData.qualifiableDate = null;
           // Actualización de horarios cuando se confirma calificación en el reporte.
           await Schedule.updateMany(
             { _id: { $in: group.scheduleIds } },
@@ -418,6 +437,7 @@ export async function processSchedules() {
               $set: {
                 calificado: true,
                 calificable: true,
+                fechaCalificable: null,
                 fechaCalificacion: gradeInfo.gradeDate || new Date(),
                 estadoCalificacion: gradeInfo.gradeStatus,
                 calificadoPorProceso: 'processSchedules'
@@ -426,11 +446,8 @@ export async function processSchedules() {
           );
           logData.result = 'Horarios actualizados como calificados';
         } else {
-          const qualifiableDate = gradeInfo.qualifiableDate || null;
           let qualifiableFuture = false;
-          if (qualifiableDate) {
-            const normalizedQualifiableDate = new Date(qualifiableDate);
-            normalizedQualifiableDate.setHours(0, 0, 0, 0);
+          if (normalizedQualifiableDate) {
             qualifiableFuture = normalizedQualifiableDate > today;
           }
 
@@ -442,6 +459,7 @@ export async function processSchedules() {
               $set: {
                 calificado: false,
                 calificable: !qualifiableFuture,
+                fechaCalificable: normalizedQualifiableDate,
                 fechaCalificacion: gradeInfo.gradeDate || null,
                 estadoCalificacion: gradeInfo.gradeStatus,
                 calificadoPorProceso: 'processSchedules'

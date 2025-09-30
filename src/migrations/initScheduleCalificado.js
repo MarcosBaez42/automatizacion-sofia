@@ -19,6 +19,13 @@ const buildCalificableBootstrap = () => ({
   ],
 });
 
+const buildFechaCalificableBootstrap = () => ({
+  $or: [
+    { fechaCalificable: { $exists: false } },
+    { fechaCalificable: { $type: 10 } },
+  ],
+});
+
 const run = async () => {
   await mongoose.connect(mongoUri);
   console.log(`Conectado a MongoDB en ${mongoUri}`);
@@ -40,6 +47,18 @@ const run = async () => {
 
   console.log(
     `Documentos inicializados con calificable=true: ${calificableResult.modifiedCount}`
+  );
+
+  const fechaCalificableFilter = buildFechaCalificableBootstrap();
+  const fechaCalificableResult = await Schedule.updateMany(
+    fechaCalificableFilter,
+    {
+      $set: { fechaCalificable: null },
+    }
+  );
+
+  console.log(
+    `Documentos sin fecha calificable normalizada: ${fechaCalificableResult.modifiedCount}`
   );
 
   const [total, pendientes, calificados] = await Promise.all([
