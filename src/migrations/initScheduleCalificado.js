@@ -20,10 +20,7 @@ const buildCalificableBootstrap = () => ({
 });
 
 const buildFechaCalificableBootstrap = () => ({
-  $or: [
-    { fechaCalificable: { $exists: false } },
-    { fechaCalificable: { $type: 10 } },
-  ],
+  fechaCalificable: { $exists: true },
 });
 
 const run = async () => {
@@ -53,12 +50,12 @@ const run = async () => {
   const fechaCalificableResult = await Schedule.updateMany(
     fechaCalificableFilter,
     {
-      $set: { fechaCalificable: null },
+      $unset: { fechaCalificable: "" },
     }
   );
 
   console.log(
-    `Documentos sin fecha calificable normalizada: ${fechaCalificableResult.modifiedCount}`
+    `Documentos con fecha calificable eliminada: ${fechaCalificableResult.modifiedCount}`
   );
 
   const [total, pendientes, calificados] = await Promise.all([

@@ -63,7 +63,7 @@ const DailyProcessingLog =
  * @param {Date} limitDate - Fecha límite utilizada para filtrar horarios.
  * @returns {Array<Object>} Stages de la agregación de MongoDB.
  */
-function buildPendingSchedulesPipeline(limitDate, today) {
+function buildPendingSchedulesPipeline(limitDate) {
   return [
     {
       $match: {
@@ -78,14 +78,10 @@ function buildPendingSchedulesPipeline(limitDate, today) {
           },
           {
             $or: [
-              { calificable: { $ne: false } },
-              {
-                $and: [
-                  { calificable: false },
-                  { fechaCalificable: { $exists: true, $ne: null } },
-                  { fechaCalificable: { $lte: today } }
-                ]
-              }
+              { calificable: { $exists: false } },
+              { calificable: true },
+              { calificable: null },
+              { calificable: { $nin: [true, false] } }
             ]
           }
         ]
@@ -142,8 +138,8 @@ function buildPendingSchedulesPipeline(limitDate, today) {
  * @param {Date} limitDate - Fecha límite para filtrar horarios.
  * @returns {Promise<Array<Object>>} Resultados de la agregación.
  */
-function fetchPendingScheduleGroups(limitDate, today) {
-  const pipeline = buildPendingSchedulesPipeline(limitDate, today);
+function fetchPendingScheduleGroups(limitDate) {
+  const pipeline = buildPendingSchedulesPipeline(limitDate);
   return Schedule.aggregate(pipeline);
 }
 
@@ -361,7 +357,7 @@ export async function processSchedules() {
   limitDate.setDate(limitDate.getDate() - 5);
 
   // Ejecución de la agregación para identificar fichas con horarios pendientes.
-  const groups = await fetchPendingScheduleGroups(limitDate, today);
+  const groups = await fetchPendingScheduleGroups(limitDate);
   const groupsToProcess = groups.slice(0, MAX_GROUPS_TO_PROCESS);
 
   if (!groups.length) {
@@ -437,11 +433,11 @@ export async function processSchedules() {
               $set: {
                 calificado: true,
                 calificable: true,
-                fechaCalificable: null,
                 fechaCalificacion: gradeInfo.gradeDate || new Date(),
                 estadoCalificacion: gradeInfo.gradeStatus,
                 calificadoPorProceso: 'processSchedules'
-              }
+              },
+              $unset: { fechaCalificable: '' }
             }
           );
           logData.result = 'Horarios actualizados como calificados';
@@ -459,11 +455,11 @@ export async function processSchedules() {
               $set: {
                 calificado: false,
                 calificable: !qualifiableFuture,
-                fechaCalificable: normalizedQualifiableDate,
                 fechaCalificacion: gradeInfo.gradeDate || null,
                 estadoCalificacion: gradeInfo.gradeStatus,
                 calificadoPorProceso: 'processSchedules'
-              }
+              },
+              $unset: { fechaCalificable: '' }
             }
           );
 

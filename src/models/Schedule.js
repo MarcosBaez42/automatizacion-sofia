@@ -8,7 +8,6 @@ const scheduleSchema = new Schema(
     fend: { type: Date },
     calificado: { type: Boolean, default: false },
     calificable: { type: Boolean, default: true },
-    fechaCalificable: { type: Date },
     fechaCalificacion: { type: Date },
     estadoCalificacion: { type: String },
     calificadoPorProceso: { type: String }
