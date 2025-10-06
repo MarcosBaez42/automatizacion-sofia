@@ -16,13 +16,26 @@ Crea un archivo `.env` en la raíz del proyecto con las credenciales necesarias.
 
 Las demás variables ya existentes (`SOFIA_USER`, `SOFIA_PASS`, etc.) continúan vigentes para el proceso automático.
 
-## Ejecutar el servidor de notificaciones
+## Instalación
 
-Instala las dependencias y ejecuta el servidor con:
+Instala las dependencias del proyecto una sola vez con:
 
 ```bash
 npm install
-node src/server.js
+```
+
+## Ejecutar el servidor de notificaciones
+
+Inicia el servidor HTTP con:
+
+```bash
+npm run start
+```
+
+Durante el desarrollo puedes mantenerlo con recarga automática utilizando Nodemon:
+
+```bash
+npm run dev
 ```
 
 Al iniciar se establecerá la conexión con MongoDB y el servicio quedará disponible en `http://localhost:PORT`.
@@ -34,6 +47,16 @@ Al iniciar se establecerá la conexión con MongoDB y el servicio quedará dispo
   - `ficheNumber` para buscar por número de ficha.
 
 El servicio también expone los archivos estáticos del directorio `public`. Puedes abrir `http://localhost:PORT/notifications.html` en el navegador para utilizar la interfaz que consume el endpoint y filtra la información.
+
+## Ejecutar el procesamiento automático de horarios
+
+El job que descarga reportes y notifica a los instructores se ejecuta bajo demanda con:
+
+```bash
+npm run process:schedules
+```
+
+Este comando reutiliza el mismo archivo `.env` para conectarse a MongoDB y a Sofía Plus, inicia sesión en el portal, descarga los reportes pendientes, analiza los resultados y envía correos a los instructores cuando corresponde. Cada ejecución deja un registro en la colección `dailyprocessinglogs` para su seguimiento desde el servidor de notificaciones.
 
 ## Pruebas manuales del cliente Sofía Plus
 
