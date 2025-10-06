@@ -34,3 +34,24 @@ Al iniciar se establecerá la conexión con MongoDB y el servicio quedará dispo
   - `ficheNumber` para buscar por número de ficha.
 
 El servicio también expone los archivos estáticos del directorio `public`. Puedes abrir `http://localhost:PORT/notifications.html` en el navegador para utilizar la interfaz que consume el endpoint y filtra la información.
+
+## Pruebas manuales del cliente Sofía Plus
+
+El cliente Playwright que automatiza Sofía Plus se puede reutilizar de forma aislada para validar credenciales o descargar un reporte puntual. La secuencia básica consiste en iniciar sesión una vez y reutilizar la misma página para generar los reportes necesarios:
+
+```js
+import SofiaPlusClient from './src/clients/sofiaPlusClient.js';
+
+const client = new SofiaPlusClient({ headless: false, slowMo: 250 });
+
+await client.login();
+await client.selectRole();
+await client.navigateToReport();
+
+const pathToReport = await client.downloadReport('1234567');
+console.log(pathToReport);
+
+await client.close();
+```
+
+Puedes configurar el modo `headless` y el retardo (`slowMo`) mediante los parámetros del constructor o las variables de entorno `HEADLESS` y `SLOWMO`. Los archivos descargados se guardan en el directorio configurado en `cfg.outputDir`.

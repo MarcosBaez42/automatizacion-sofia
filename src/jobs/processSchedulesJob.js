@@ -50,9 +50,12 @@ export async function run() {
   );
 
   const client = new SofiaPlusClient();
-  await client.login();
 
   try {
+    await client.login();
+    await client.selectRole();
+    await client.navigateToReport();
+
     for (const group of groupsToProcess) {
       const logData = {
         fiche: group.ficheId,
@@ -138,6 +141,9 @@ export async function run() {
         await DailyProcessingLog.create(logData);
       }
     }
+  } catch (error) {
+    console.error('Fallo general durante el procesamiento de horarios en Sofía Plus:', error);
+    throw error;
   } finally {
     await client.close();
     await mongoose.disconnect();
