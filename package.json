@@ -2,6 +2,9 @@
     "name": "sena-automatizacion",
     "version": "1.0.0",
     "type": "module",
+    "scripts": {
+        "process:schedules": "node src/jobs/processSchedulesJob.js"
+    },
     "dependencies": {
         "bcryptjs": "^2.4.3",
         "cors": "^2.8.5",
